@@ -1,4 +1,4 @@
-from board import Board
+from Board import Board
 
 run = True
 board = Board()
