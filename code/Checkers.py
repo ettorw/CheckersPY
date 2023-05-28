@@ -8,4 +8,4 @@ print("==========| CheckerPY |==========")
 while run:
     print(board.print_board())
     print(board.piece_moves(2, 1))
-    input()
+    input() 
