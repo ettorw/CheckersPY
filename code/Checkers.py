@@ -1,23 +1,23 @@
 import sys
 from PyQt5.QtGui import QColor, QBrush, QPen, QPainter
 from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt
 
 from Board import Board
 
 board = Board()
 
 class CheckersBoard(QWidget):
-    def __init__(self):
+    def __init__(self, board):
         super().__init__()
         self.piece_size = 120
         self.setGeometry(500, 200, 8 * self.piece_size, 8 * self.piece_size)
         self.setWindowTitle("Checkers Board")
-        
-        self.selected_piece = None
-        self.selected_piece_pos = None
-        
         self.show()
+        
+        # Initialize click variables
+        self.first_click_row = None
+        self.first_click_col = None
 
     def paintEvent(self, event):
         painter = QPainter()
@@ -42,9 +42,9 @@ class CheckersBoard(QWidget):
                     elif piece == 2:
                         color = QColor("#d90511")
                     elif piece == 3:
-                        color = QColor("#63E7FE")
+                        color = QColor("#0197b2")
                     elif piece == 4:
-                        color = QColor("#d90511")
+                        color = QColor("#7c0309")
 
                     painter.setBrush(QBrush(color))
                     painter.setPen(QPen(Qt.black, 2))
@@ -53,50 +53,22 @@ class CheckersBoard(QWidget):
         painter.end()
 
     def mousePressEvent(self, event):
-        x = event.x()
-        y = event.y()
+        self.start = [event.pos().y() // self.piece_size, event.pos().x() // self.piece_size]
 
-        row = y // self.piece_size
-        col = x // self.piece_size
-
-        piece = board.board[row][col]
-        if piece != 0 and piece != -1:
-            self.selected_piece = piece
-            self.selected_piece_pos = (row, col)
-
-    def mouseMoveEvent(self, event):
-        if self.selected_piece is not None:
-            x = event.x()
-            y = event.y()
-
-            row = y // self.piece_size
-            col = x // self.piece_size
-
-            if board.is_valid_move(self.selected_piece_pos, [row, col]):
-                self.selected_piece_pos = (row, col)
-                self.update()
+        if self.start[0] < 0 or self.start[0] > 7 or self.start[1] < 0 or self.start[1] > 7:
+            return
 
     def mouseReleaseEvent(self, event):
-        if self.selected_piece is not None:
-            x = event.x()
-            y = event.y()
+        self.end = [event.pos().y() // self.piece_size, event.pos().x() // self.piece_size]
 
-            row = y // self.piece_size
-            col = x // self.piece_size
+        if self.end[0] < 0 or self.end[0] > 7 or self.end[1] < 0 or self.end[1] > 7:
+            return
 
-            if board.is_valid_move(self.selected_piece_pos, [row, col]):
-                board.update_position(self.selected_piece_pos, [row, col])
-                self.selected_piece = None
-                self.selected_piece_pos = None
-                self.update()
-            else:
-                self.selected_piece = None
-                self.selected_piece_pos = None
-                self.update()
-
+        board.move(self.start, self.end)
+        self.update()
 
 app = QApplication(sys.argv)
-ex = CheckersBoard()
+ex = CheckersBoard(board)
 sys.exit(app.exec_())
 
 """
